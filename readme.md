@@ -94,4 +94,8 @@ subscriptions model =
 ```
 
 
-After this, you should match branch [02](https://github.com/jenningstcj/Elm-Workshop/tree/02)
+After this, you should match branch [02](https://github.com/jenningstcj/Elm-Workshop/tree/02) and have an application that compiles successfully.  You can compile the application from the root directory with:
+
+```
+elm-make --warn src/Main.elm --output=main.js
+```
