@@ -4,6 +4,7 @@ In this short tutorial we will walk through the steps to build the demo from [In
 
 Go ahead and download branch [01_Start](https://github.com/jenningstcj/Elm-Workshop/tree/01_Start) and follow along with the tutorial below.
 
+### Install Dependencies
 
 Go ahead and install Elm and dependenices for Html and Http with the commands:
 
@@ -26,6 +27,7 @@ Go ahead and update the elm-package.json line for source-directories to match th
   "src"
 ],
 ```
+### Setup the Elm Architecture
 
 Then make src/Main.elm for your Elm application and set it up with the basic Elm Architecture for Html.App.Program:
 
@@ -94,11 +96,16 @@ subscriptions model =
 ```
 
 
-After this, you should match branch [02](https://github.com/jenningstcj/Elm-Workshop/tree/02) and have an application that compiles successfully.  You can compile the application from the root directory with:
+After this, you should match [branch 02](https://github.com/jenningstcj/Elm-Workshop/tree/02) and have an application that compiles successfully.  You can compile the application from the root directory with:
 
 ```
 elm-make --warn src/Main.elm --output=main.js
 ```
+
+***
+
+
+### Setup Model
 
 Next we will build our Model.  Since part of our model will be used with Ports, we will create that type alias in a separate file.  Go ahead and make a src/SharedModels.elm file.  We will share a type alias that contains a latitude and longitude to share with our Ports to also use in JavaScript with Google Maps.  In the src/SharedModels.elm file, declare the module and add the following type alias:
 
@@ -151,6 +158,9 @@ view model =
         , p [] [ text ("Velocity: " ++ toString model.vel ++ " miles per hour") ]
         ]
 ```
+
+
+### Setup Ports for JS Interop
 
 Last step in this branch will be to setup Ports to communicate with JavaScript to update Google Maps.  Ports have to be declared in their own module so let's create a GMaps.elm file and inside of it let's create two ports.  One for sending values from Elm to JavaScript and one to receive values in Elm from JavaScript:
 
@@ -229,6 +239,109 @@ If you compile your application now with:
 elm-make --warn src/Main.elm --output=main.js
 ```
 
-You should have a working application that initializes and centers the map to Knoxville.  If you drag the map around, you should see the Latitude and Longitude values update as well.
+You should have a working application (open the index.html a web browser) that initializes and centers the map to Knoxville.  If you drag the map around, you should see the Latitude and Longitude values update as well.
 
-Now your code should match [03](https://github.com/jenningstcj/Elm-Workshop/tree/03).
+Now your code should match [branch 03](https://github.com/jenningstcj/Elm-Workshop/tree/03).
+
+
+***
+
+
+### Retrieve Data from HTTP
+
+In preparation to make our HTTP call to retrieve live data about the International Space Station we need to add a few dependencies:
+```
+import Http
+import Json.Decode exposing (..)
+import Task
+```
+
+Next, let's model our data we want to retrieve.  The JSON object we will receive as many items, but we only want four.  If you want to see the full JSON object, open https://api.wheretheiss.at/v1/satellites/25544 in your browser.  We only want to use the latitude, longitude, altitude, and velocity.  Create a type alias for these items:
+```
+type alias ISS_JSON =
+    { latitude : Float
+    , longitude : Float
+    , altitude : Float
+    , velocity : Float
+    }
+```
+
+HTTP calls in Elm consist of three main parts:  the function that performs the HTTP task, the Decoder to interpret and map the JSON to a type alias, and the Update Msg's to handle success and failures.  To perform an HTTP task, you need to structure the Http.Get call and provide the JSON decoder and url.  The HTTP call does not actually initiate communication until the task output by Http.get is 'performed'.  We will create a function called 'getLocation' to retrieve up-to-date information about the Space Station:
+
+```
+-- Http
+
+
+getLocation : Cmd Msg
+getLocation =
+    let
+        url =
+            "https://api.wheretheiss.at/v1/satellites/25544"
+    in
+        (Http.get decodeISSPosition url)
+            |> Task.perform FetchFail FetchSucceed
+```
+
+Perhaps one of the biggest difference in Elm that catches people new to the language off guard is that fact that you must parse/decode your JSON responses.  This is because the strictness of the language does not allow variability in data or data types.  The decoder for our ISS_JSON object is pretty simple and can use a built in decoder called 'object4' to decode our small object and then a 'float' decoder to parse each data item to the correct type:
+
+```
+decodeISSPosition : Decoder ISS_JSON
+decodeISSPosition =
+    object4 ISS_JSON
+        ("latitude" := float)
+        ("longitude" := float)
+        ("altitude" := float)
+        ("velocity" := float)
+```
+
+The last step in this branch is to add in our FetchFail and FetchSucceed update message types to handle the response of our Http getLocation function.  Go ahead and add the message types to our Msg type.  An Http task returns the JSON on a FetchSucceed and an Http.Error type on FetchFail:
+
+```
+type Msg
+    = MapMoved GMPos
+    | FetchSucceed ISS_JSON
+    | FetchFail Http.Error
+```
+
+Now for the update functions:
+
+```
+        FetchSucceed newISSPos ->
+            let
+                newPos =
+                    GMPos newISSPos.latitude newISSPos.longitude
+
+                velocity =
+                    kilometersToMiles newISSPos.velocity
+
+                altitude =
+                    kilometersToMiles newISSPos.altitude
+            in
+                ( { model
+                    | pos = newPos
+                    , vel = velocity
+                    , alt = altitude
+                  }
+                , moveMap newPos
+                )
+
+        FetchFail _ ->
+            ( model, Cmd.none )
+```
+
+One thing you may notice right at the start.  Our JSON is returning Float values, however, our altitude and velocity values on our Model are of type Int.  Therefore we have to write a little helper function - 'kilometersToMiles' - to use in our update function.  Lastly, our FetchFail will just swallow any errors for now and return the previous model.
+
+The kilomtersToMiles conversion function is some simple math and a round down to the nearest integer:
+```
+kilometersToMiles : Float -> Int
+kilometersToMiles km =
+    km
+        * 0.62137
+        |> round
+```
+
+Now if you compile this with:
+```
+elm-make --warn src/Main.elm --output=main.js
+```
+You should have a successful compile, but if you open the index.html in a browser you may not see any difference yet because nothing is triggering the HTTP call to actually happen.  Your code should match [branch 04](https://github.com/jenningstcj/Elm-Workshop/tree/04).
