@@ -345,3 +345,41 @@ Now if you compile this with:
 elm-make --warn src/Main.elm --output=main.js
 ```
 You should have a successful compile, but if you open the index.html in a browser you may not see any difference yet because nothing is triggering the HTTP call to actually happen.  Your code should match [branch 04](https://github.com/jenningstcj/Elm-Workshop/tree/04).
+
+
+***
+
+### Subscribe to New Data
+
+We have one last minor step to finish our appliction.  We need to setup a subscription to subscribe to an interval to poll for new data.  To do this, we will import Time, add a new subscription to our batch, and add an Update Msg type to handle our command.
+```
+import Time exposing (..)
+
+...
+
+Sub.batch
+        [ mapMoved MapMoved
+        , Time.every (5 * second) FetchPosition
+        ]
+```
+
+Our Sub.batch is merely a list of subscriptions.  We already had the mapMoved subscription, now we had an interval with the Elm runtime will subscribe to.  To create an interval, we use Time.every and then a time amount.  Values such as second, minute, etc already exist so we build off that and use 5 * second to create 5 seconds.  Then call a new Msg type, FetchPosition.  Since FetchPosition is being called by the Time module, it needs to take Time as a parameter.
+
+```
+type Msg =
+   ...
+   | FetchPosition Time
+```
+
+Our update function for FetchPosition will return our previous model and then issue the command for getLocation.
+```
+        FetchPosition time ->
+            ( model, getLocation )
+```
+
+Now you should be able to compile and run your application and have a full working web app that tracks the International Space Station.  Congratulations!
+```
+elm-make --warn src/Main.elm --output=main.js
+```
+
+Your code should match [branch 05](https://github.com/jenningstcj/Elm-Workshop/tree/05).
