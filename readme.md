@@ -15,7 +15,7 @@ elm-package install elm-lang/core -y
 and
 
 ```
-elm-package install evancz/elm-http -y
+elm-package install elm-lang/http -y
 ```
 
 This created an elm-package.json file and downloaded the dependencies to the elm-stuff directory.
