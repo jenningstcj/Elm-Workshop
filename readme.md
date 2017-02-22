@@ -20,10 +20,17 @@ elm-package install elm-lang/http -y
 
 This created an elm-package.json file and downloaded the dependencies to the elm-stuff directory.
 
+Go ahead and update the elm-package.json line for source-directories to match the following:
+
+```
+"source-directories": [
+  "src"
+],
+```
 
 ### Setup the Elm Architecture
 
-Then make Main.elm for your Elm application and set it up with the basic Elm Architecture for Html.App.Program:
+Then make src/Main.elm for your Elm application and set it up with the basic Elm Architecture for Html.App.Program:
 
 ```
 module Main exposing (..)
@@ -101,7 +108,7 @@ elm-make --warn Main.elm --output=main.js
 
 ### Setup Model
 
-Next we will build our Model.  Since part of our model will be used with Ports, we will create that type alias in a separate file.  Go ahead and make a SharedModels.elm file.  We will share a type alias that contains a latitude and longitude to share with our Ports to also use in JavaScript with Google Maps.  In the SharedModels.elm file, declare the module and add the following type alias:
+Next we will build our Model.  Since part of our model will be used with Ports, we will create that type alias in a separate file.  Go ahead and make a src/SharedModels.elm file.  We will share a type alias that contains a latitude and longitude to share with our Ports to also use in JavaScript with Google Maps.  In the src/SharedModels.elm file, declare the module and add the following type alias:
 
 ```
 module SharedModels exposing (..)
@@ -111,7 +118,7 @@ type alias GMPos =
   , lng : Float
   }
 ```
-Then in the Main.elm file, import the previously created type alias:
+Then in the src/Main.elm file, import the previously created type alias:
 
 ```
 import SharedModels exposing (GMPos)
@@ -156,7 +163,7 @@ view model =
 
 ### Setup Ports for JS Interop
 
-Last step in this branch will be to setup Ports to communicate with JavaScript to update Google Maps.  Ports have to be declared in their own module so let's create a GMaps.elm file and inside of it let's create two ports.  One for sending values from Elm to JavaScript and one to receive values in Elm from JavaScript:
+Last step in this branch will be to setup Ports to communicate with JavaScript to update Google Maps.  Ports have to be declared in their own module so let's create a src/GMaps.elm file and inside of it let's create two ports.  One for sending values from Elm to JavaScript and one to receive values in Elm from JavaScript:
 
 ```
 port module GMaps exposing (..)
@@ -173,7 +180,7 @@ port mapMoved : (GMPos -> msg) -> Sub msg
 
 Specifically, we are sending a latitude/longitude object to JavaScript to update our map and receiving new values in Elm when the map is moved independently.
 
-Let's use our new ports in Main.elm:
+Let's use our new ports in src/Main.elm:
 ```
 import GMaps exposing (moveMap, mapMoved)
 
@@ -230,7 +237,7 @@ First we use our port moveMap to subscribe to data coming from Elm into JavaScri
 If you compile your application now with:
 
 ```
-elm-make --warn Main.elm --output=main.js
+elm-make --warn src/Main.elm --output=main.js
 ```
 
 You should have a working application (open the index.html a web browser) that initializes and centers the map to Knoxville.  If you drag the map around, you should see the Latitude and Longitude values update as well.
@@ -336,7 +343,7 @@ kilometersToMiles km =
 
 Now if you compile this with:
 ```
-elm-make --warn Main.elm --output=main.js
+elm-make --warn src/Main.elm --output=main.js
 ```
 You should have a successful compile, but if you open the index.html in a browser you may not see any difference yet because nothing is triggering the HTTP call to actually happen.  Your code should match [branch 04](https://github.com/jenningstcj/Elm-Workshop/tree/04).
 
@@ -373,7 +380,7 @@ Our update function for FetchPosition will return our previous model and then is
 
 Now you should be able to compile and run your application and have a full working web app that tracks the International Space Station.  Congratulations!
 ```
-elm-make --warn Main.elm --output=main.js
+elm-make --warn src/Main.elm --output=main.js
 ```
 
 Your code should match [branch 05](https://github.com/jenningstcj/Elm-Workshop/tree/05).
