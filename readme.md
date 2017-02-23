@@ -20,13 +20,14 @@ elm-package install elm-lang/http -y
 
 This created an elm-package.json file and downloaded the dependencies to the elm-stuff directory.
 
-Go ahead and update the elm-package.json line for source-directories to match the following:
+Create a `src` directory and update the elm-package.json line for source-directories to match the following:
 
 ```
 "source-directories": [
   "src"
 ],
 ```
+This is where we will put all of our Elm code.
 
 ### Setup the Elm Architecture
 
