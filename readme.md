@@ -1,29 +1,27 @@
-## Elm Workshop
+# Elm Workshop
 
 In this short tutorial we will walk through the steps to build the demo from [IntroToElm](https://jenningstcj.github.io/IntroToElm/Demos/GoogleMaps/index.html) where we cover many of the topics that exist in real world applications: Commands, Subscriptions, Http calls, JSON decoding, interop with JavaScript through Ports.  
+
+---
+
+## Lesson 1: Getting Started
 
 Go ahead and download branch [01_Start](https://github.com/jenningstcj/Elm-Workshop/tree/01_Start) and follow along with the tutorial below.
 ```
 git clone https://github.com/jenningstcj/Elm-Workshop.git -b 01_Start Elm-Workshop
 ```
 
-### Install Dependencies
+### Installing Dependencies
 
-Go ahead and install Elm and dependenices for Html and Http with the commands:
+If you have installed Elm already, do so now with `npm install -g elm`.  This will install Elm globally and allow the usage of `elm-make`, `elm-reactor`, `elm-repl`, and `elm-package`.  
 
-```
-elm-package install elm-lang/core -y 
-```
-
-and
+The **01_Start** branch of this repo is barebones with only an HTML file.  Navigate to the root of the `Elm-Workshop` directory in your terminal.  The quickest way to start a new Elm project is to type `elm-make` and hit Enter.  This will create an elm-package.json file and install the Core and Html libraries for Elm.  Then go ahead and install the Http library with the command:
 
 ```
 elm-package install elm-lang/http -y
 ```
 
-This created an elm-package.json file and downloaded the dependencies to the elm-stuff directory.
-
-Create a `src` directory and update the elm-package.json line for source-directories to match the following:
+Now that we have a dependencies installed, create a `src` directory and update the elm-package.json line for source-directories to match the following:
 
 ```
 "source-directories": [
@@ -34,13 +32,12 @@ This is where we will put all of our Elm code.
 
 ### Setup the Elm Architecture
 
-Then make src/Main.elm for your Elm application and set it up with the basic Elm Architecture for Html.App.Program:
+Then create a src/Main.elm file for your Elm application and set it up with the basic Elm Architecture for Html.program:
 
 ```
 module Main exposing (..)
 
 import Html exposing (Html, div, p, text)
-import Html.App
 
 
 -- MAIN
@@ -74,7 +71,7 @@ init =
 
 
 type Msg
-    = Placeholder
+    = Update
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -100,15 +97,19 @@ subscriptions model =
     Sub.none
 ```
 
-
-After this, you should match [branch 02](https://github.com/jenningstcj/Elm-Workshop/tree/02) and have an application that compiles successfully.  You can compile the application from the root directory with:
+This is a barebones Elm program.  We have our `init`, `view`, `update`, and `subscriptions` functions.  We have an empty Model.  Our `init` function return an empty model, our `update` function returns the empty model, our `view` function returns a single Html Msg, and our `subscriptions` are set to none.  This is a fully compilable, yet empty program.  You can compile it with:
 
 ```
-elm-make --warn Main.elm --output=main.js
+elm-make --warn src/Main.elm --output=main.js
 ```
+Now if you open the `index.html` file in your browser you should see the Google Maps displayed and if you inspect the source code you will see the empty div returned by your Elm program.
 
-***
+This is the end of Lesson 1.  Your code should match [branch 02](https://github.com/jenningstcj/Elm-Workshop/tree/02).
 
+
+---
+
+## Lesson 2: Defining our Models and JS Interop
 
 ### Setup Model
 
