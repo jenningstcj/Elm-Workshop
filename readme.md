@@ -4,7 +4,7 @@ In this short tutorial we will walk through the steps to build the demo from [In
 
 Go ahead and download branch [01_Start](https://github.com/jenningstcj/Elm-Workshop/tree/01_Start) and follow along with the tutorial below.
 ```
-git clone https://github.com/jenningstcj/Elm-Workshop.git --branch 01_Start --single-branch Elm-Workshop
+git clone https://github.com/jenningstcj/Elm-Workshop.git -b 01_Start Elm-Workshop
 ```
 
 ### Install Dependencies
