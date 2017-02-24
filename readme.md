@@ -113,7 +113,7 @@ This is the end of Lesson 1.  Your code should match [branch 02](https://github.
 
 ### Setup Model
 
-Next we will build our Model.  Since part of our model will be used with Ports, we will create that type alias in a separate file.  Go ahead and make a src/SharedModels.elm file.  We will share a type alias that contains a latitude and longitude to share with our Ports to also use in JavaScript with Google Maps.  In the src/SharedModels.elm file, declare the module and add the following type alias:
+Next we will define our Model.  Since part of our model will be used with Ports to facilitate JS interop, we will create that type alias in a separate file.  Go ahead and make a src/SharedModels.elm file.  We will share a type alias that contains a latitude and longitude to share with our Ports to also use in JavaScript with Google Maps.  In the src/SharedModels.elm file, declare the module and add the following type alias:
 
 ```
 module SharedModels exposing (..)
@@ -154,7 +154,6 @@ init =
 Let's update our view to be able to see the values of our model:
 
 ```
-
 view : Model -> Html Msg
 view model =
     div []
@@ -165,10 +164,11 @@ view model =
         ]
 ```
 
+If you build the application now with `elm-make --warn src/Main.elm --output=main.js` and open the `index.html` file in a browser, you will see our html markup from our Elm application displaying the Latitude and Longitude of Knoxville, and an empty Altitude and Velocity.
 
 ### Setup Ports for JS Interop
 
-Last step in this branch will be to setup Ports to communicate with JavaScript to update Google Maps.  Ports have to be declared in their own module so let's create a src/GMaps.elm file and inside of it let's create two ports.  One for sending values from Elm to JavaScript and one to receive values in Elm from JavaScript:
+Last step in this lesson will be to setup Ports to communicate with JavaScript to update Google Maps.  Ports have to be declared in their own module so let's create a src/GMaps.elm file and inside of it let's create two ports.  One for sending values from Elm to JavaScript and one to receive values in Elm from JavaScript:
 
 ```
 port module GMaps exposing (..)
@@ -176,20 +176,25 @@ port module GMaps exposing (..)
 import SharedModels exposing (GMPos)
 
 
--- PORTS
+-- OUTGOING PORTS
 
 port moveMap : GMPos -> Cmd msg
+
+-- INCOMING PORTS
 
 port mapMoved : (GMPos -> msg) -> Sub msg
 ```
 
-Specifically, we are sending a latitude/longitude object to JavaScript to update our map and receiving new values in Elm when the map is moved independently.
+Specifically, we are sending a latitude/longitude object to JavaScript to update our map and receiving new values in Elm when the map is moved independently.  An outgoing port takes a Model and executes a Cmd msg.  An incoming port takes a Model and a command and outputs a Subscription msg.
 
 Let's use our new ports in src/Main.elm:
 ```
 import GMaps exposing (moveMap, mapMoved)
 
-...
+```
+
+Then let's update our `init` function to update our Google Maps position to our Knoxville coordinates upong program initialization.  In place of the `Cmd.none`, we will call our `moveMap` port and give it our Knoxville `GMPos` model.
+```
 
 init : ( Model, Cmd Msg )
 init =
@@ -199,27 +204,31 @@ init =
     in
         ( Model knoxville 0 0, moveMap knoxville )
 
-...
+```
 
+Next, in our `subscriptions` function we will replace `Sub.none` with a`Sub.batch`, which takes a list of Subscription Msgs.  Specifically we will add our `mapMoved` port and give it a new Msg type to describe and Update action - `MapMovedUpdate`.  
+```
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ mapMoved MapMovedUpdate ]
+
+```
+
+Now we need to create our `MapMovedUpdate` Msg type.  So replace the unused `Update` Msg type with `MapMovedUpdate GMPos`.  Remember our `mapMoved` port takes a `GMPos` model and output a Subscription.  Then add a `case` statement to our `update` function that takes the incoming `GMPos` and updates our internal model.
+```
 type Msg
-    = MapMoved GMPos
+    = MapMovedUpdate GMPos
     
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        MapMoved newPos ->
+        MapMovedUpdate newPos ->
             ( { model | pos = newPos }, Cmd.none )
-
-...
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.batch
-        [ mapMoved MapMoved ]
 
 ```
 
-Above we now are sending values to JavaScript when our Model is initalized.  We also setup a Subscription to handle incoming values from JavaScript, create a new Msg type to handle when the map is moved and an update action to update our Model with the map's new position.  Now we need to update the JavaScript in our index.html to communicate with the Ports we just created.  Beneath the JavaScript initalizing our Google Maps instance, add the following:
+Right now if we build our application we won't see anything different.  Our Elm application is trying to sent data out to update the map and it is listening for data coming in, but there isn't anything outside of our application that is receiving or sending data.  We need to update the JavaScript in our index.html to communicate with the Ports we just created.  Beneath the JavaScript initalizing our Google Maps instance, add the following:
 
 ```
        instance.ports.moveMap.subscribe(function(gmPos) {
@@ -237,31 +246,26 @@ Above we now are sending values to JavaScript when our Model is initalized.  We 
           instance.ports.mapMoved.send(newPos);
         });
 ```
-First we use our port moveMap to subscribe to data coming from Elm into JavaScript.  We log the value to the console, create a new Google Maps Latitude/Longitude object, and then set the center of our map to the new position and update are marker as well.  Secondly, we add a drag event to our map so that whenever the map is manually moved we calculate the new center position and send the value into Elm through our mapMoved port.
+First we use our port `moveMap` to subscribe to data coming from Elm into JavaScript.  We log the value to the console, create a new Google Maps Latitude/Longitude object, and then set the center of our map to the new position and update are marker as well.  Secondly, we add a drag event to our map so that whenever the map is manually moved we calculate the new center position and send the value into Elm through our `mapMoved` port.  It is two pub/sub relationships to handle two-way communication between JavaScript and our Elm application.
 
-If you compile your application now with:
-
-```
-elm-make --warn src/Main.elm --output=main.js
-```
-
-You should have a working application (open the index.html a web browser) that initializes and centers the map to Knoxville.  If you drag the map around, you should see the Latitude and Longitude values update as well.
+If you compile your application now with `elm-make --warn src/Main.elm --output=main.js` you should have a working application that initializes and centers the map to Knoxville.  If you drag the map around, you should see the Latitude and Longitude values update as well.
 
 Now your code should match [branch 03](https://github.com/jenningstcj/Elm-Workshop/tree/03).
 
 
-***
+---
 
+## Lesson 3: HTTP
 
 ### Retrieve Data from HTTP
 
-In preparation to make our HTTP call to retrieve live data about the International Space Station we need to add a few dependencies:
+In preparation to make our HTTP call to retrieve live data about the International Space Station we need to add a couple dependencies:
 ```
 import Http
 import Json.Decode exposing (..)
 ```
 
-Next, let's model our data we want to retrieve.  The JSON object we will receive as many items, but we only want four.  If you want to see the full JSON object, open https://api.wheretheiss.at/v1/satellites/25544 in your browser.  We only want to use the latitude, longitude, altitude, and velocity.  Create a type alias for these items:
+Next, let's model our data we want to retrieve.  The JSON object we will receive many items, but we only want four.  If you want to see the full JSON object, open https://api.wheretheiss.at/v1/satellites/25544 in your browser.  We only want to use the latitude, longitude, altitude, and velocity.  Create a type alias for these items:
 ```
 type alias ISS_JSON =
     { latitude : Float
@@ -271,7 +275,7 @@ type alias ISS_JSON =
     }
 ```
 
-HTTP calls in Elm consist of three main parts:  the function that performs the HTTP task, the Decoder to interpret and map the JSON to a type alias, and the Update Msg's to handle success and failures.  To perform an HTTP task, you need to structure the Http.Get call and provide the JSON decoder and url.  The HTTP call does not actually initiate communication until the task output by Http.get is 'performed'.  We will create a function called 'getLocation' to retrieve up-to-date information about the Space Station:
+HTTP calls in Elm consist of three main parts:  the function that performs the HTTP command, the Decoder to interpret and map the JSON to a type alias, and the Update Msg's to handle success and failures.  To perform an HTTP command, you need to structure the `Http.get` call and provide the url and JSON decoder.  The HTTP call does not actually initiate communication until we tell Elm to execute the command with `Http.send`.  We will create a new `-- Http` section in our application to group our Http stuff.  Then create a function called 'getLocation' to retrieve up-to-date information about the Space Station:
 
 ```
 -- Http
@@ -289,7 +293,7 @@ getLocation =
        Http.send LoadData request
 ```
 
-Perhaps one of the biggest difference in Elm that catches people new to the language off guard is that fact that you must parse/decode your JSON responses.  This is because the strictness of the language does not allow variability in data or data types.  The decoder for our ISS_JSON object is pretty simple and can use a built in decoder called 'object4' to decode our small object and then a 'float' decoder to parse each data item to the correct type:
+Perhaps one of the biggest difference in Elm that catches newcomers to the language off guard is the fact that you must parse/decode your JSON responses.  This is because the strictness of the language does not allow variability in data or data types.  The decoder for our ISS_JSON object is pretty simple and can use a built in decoder called 'map4' to decode our small object and then a 'float' decoder to parse each field to the correct type:
 
 ```
 decodeISSPosition : Decoder ISS_JSON
@@ -301,7 +305,9 @@ decodeISSPosition =
         (field "velocity" float)
 ```
 
-The last step in this branch is to add in our FetchFail and FetchSucceed update message types to handle the response of our Http getLocation function.  Go ahead and add the message types to our Msg type.  An Http task returns the JSON on a FetchSucceed and an Http.Error type on FetchFail:
+There are other ways to decode JSON data, including options for handling dynamic data.  In the case of dynamic data you'd want to use the `oneOf` function and provide a list of decoders.  The compiler would then try each decoder in the list until one succeeded.
+
+The last step in this lesson is to add in our `LoadData` update message type to handle the response of our Http getLocation function.  An Http call returns a `Result` type with an `error` option and a `value` option.  This let's us use one update function for handling both successes and failures. 
 
 ```
 type Msg
@@ -309,7 +315,7 @@ type Msg
     | LoadData (Result Http.Error ISS_JSON)
 ```
 
-Now for the update functions:
+Now we can pattern match on whether the LoadData contains an `Ok` type or an `Err` type.  The `Ok` type will contain our decoded data and the `Err` type will contain the error message.  An `Err` type will be returned whenever there is an error executing the Http call or whenever there is a problem decoding the JSON.  In this example we won't act upon the `Err` state, but in real applications you may log it or handle it in some way.  Our `Ok` branch updates the `GMPos` field on our model along with the velocity and altitude.  Since the data returned is in Kilometers per hour, we are making a quick conversion with a helper function you will see next.
 
 ```
       LoadData (Ok newISSPos) ->
@@ -346,14 +352,12 @@ kilometersToMiles km =
         |> round
 ```
 
-Now if you compile this with:
-```
-elm-make --warn src/Main.elm --output=main.js
-```
-You should have a successful compile, but if you open the index.html in a browser you may not see any difference yet because nothing is triggering the HTTP call to actually happen.  Your code should match [branch 04](https://github.com/jenningstcj/Elm-Workshop/tree/04).
+Now if you compile this with `elm-make --warn src/Main.elm --output=main.js` you should have a successful compile, but if you open the index.html in a browser you may not see any difference yet because nothing is triggering the HTTP call to actually happen.  Your code should match [branch 04](https://github.com/jenningstcj/Elm-Workshop/tree/04).
 
 
-***
+---
+
+## Lesson 4: Subscriptions
 
 ### Subscribe to New Data
 
