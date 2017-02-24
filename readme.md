@@ -392,4 +392,4 @@ Now you should be able to compile and run your application and have a full worki
 elm-make --warn src/Main.elm --output=main.js
 ```
 
-Your code should match [branch 05](https://github.com/jenningstcj/Elm-Workshop/tree/05).
+Your code should now match [branch 05](https://github.com/jenningstcj/Elm-Workshop/tree/05).
