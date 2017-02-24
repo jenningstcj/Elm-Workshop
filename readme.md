@@ -231,20 +231,20 @@ update msg model =
 Right now if we build our application we won't see anything different.  Our Elm application is trying to sent data out to update the map and it is listening for data coming in, but there isn't anything outside of our application that is receiving or sending data.  We need to update the JavaScript in our index.html to communicate with the Ports we just created.  Beneath the JavaScript initalizing our Google Maps instance, add the following:
 
 ```JavaScript
-       instance.ports.moveMap.subscribe(function(gmPos) {
-            console.log("received", gmPos);
-            var myLatlng = new google.maps.LatLng(gmPos);
-            gmap.setCenter(myLatlng);
-            marker.setPosition(myLatlng);
-        });
+ instance.ports.moveMap.subscribe(function(gmPos) {
+      console.log("received", gmPos);
+      var myLatlng = new google.maps.LatLng(gmPos);
+      gmap.setCenter(myLatlng);
+      marker.setPosition(myLatlng);
+  });
 
-        gmap.addListener('drag', function() {
-          var newPos = {
-            lat: gmap.getCenter().lat(),
-            lng: gmap.getCenter().lng()
-          };
-          instance.ports.mapMoved.send(newPos);
-        });
+  gmap.addListener('drag', function() {
+    var newPos = {
+      lat: gmap.getCenter().lat(),
+      lng: gmap.getCenter().lng()
+    };
+    instance.ports.mapMoved.send(newPos);
+  });
 ```
 First we use our port `moveMap` to subscribe to data coming from Elm into JavaScript.  We log the value to the console, create a new Google Maps Latitude/Longitude object, and then set the center of our map to the new position and update are marker as well.  Secondly, we add a drag event to our map so that whenever the map is manually moved we calculate the new center position and send the value into Elm through our `mapMoved` port.  It is two pub/sub relationships to handle two-way communication between JavaScript and our Elm application.
 
@@ -318,27 +318,27 @@ type Msg
 Now we can pattern match on whether the LoadData contains an `Ok` type or an `Err` type.  The `Ok` type will contain our decoded data and the `Err` type will contain the error message.  An `Err` type will be returned whenever there is an error executing the Http call or whenever there is a problem decoding the JSON.  In this example we won't act upon the `Err` state, but in real applications you may log it or handle it in some way.  Our `Ok` branch updates the `GMPos` field on our model along with the velocity and altitude.  Since the data returned is in Kilometers per hour, we are making a quick conversion with a helper function you will see next.
 
 ```Elm
-      LoadData (Ok newISSPos) ->
-           let
-               newPos =
-                   GMPos newISSPos.latitude newISSPos.longitude
+LoadData (Ok newISSPos) ->
+     let
+         newPos =
+             GMPos newISSPos.latitude newISSPos.longitude
 
-               velocity =
-                   kilometersToMiles newISSPos.velocity
+         velocity =
+             kilometersToMiles newISSPos.velocity
 
-               altitude =
-                   kilometersToMiles newISSPos.altitude
-           in
-               ( { model
-                   | pos = newPos
-                   , vel = velocity
-                   , alt = altitude
-                 }
-               , moveMap newPos
-               )
+         altitude =
+             kilometersToMiles newISSPos.altitude
+     in
+         ( { model
+             | pos = newPos
+             , vel = velocity
+             , alt = altitude
+           }
+         , moveMap newPos
+         )
 
-      LoadData (Err _) ->
-           ( model, Cmd.none )
+LoadData (Err _) ->
+     ( model, Cmd.none )
 ```
 
 One thing you may notice right at the start.  Our JSON is returning Float values, however, our altitude and velocity values on our Model are of type Int.  Therefore we have to write a little helper function - 'kilometersToMiles' - to use in our update function.  Lastly, our FetchFail will just swallow any errors for now and return the previous model.
@@ -383,8 +383,8 @@ type Msg =
 
 Our update function for FetchPosition will return our previous model and then issue the command for getLocation.
 ```Elm
-        FetchPosition time ->
-            ( model, getLocation )
+FetchPosition time ->
+    ( model, getLocation )
 ```
 
 Now you should be able to compile and run your application and have a full working web app that tracks the International Space Station.  Congratulations!
