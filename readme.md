@@ -4,6 +4,23 @@ In this short tutorial we will walk through the steps to build the demo from [In
 
 ---
 
+## Requirements
+
+Please have Elm installed prior to coming to the workshop.  The simplest way is to install [Node](https://nodejs.org/en/) and then run `npm install -g elm`.
+
+Also, it makes a world of difference to have your editor of choice configured with Elm packages for syntax highlighting, etc.  Here are plugins for some of the most common editors:
+
+*   [Atom](https://atom.io/packages/language-elm)
+*   [Brackets](https://github.com/lepinay/elm-brackets)
+*   [Emacs](https://github.com/jcollard/elm-mode)
+*   [IntelliJ](https://github.com/durkiewicz/elm-plugin)
+*   [Light Table](https://github.com/rundis/elm-light)
+*   [Sublime Text](https://packagecontrol.io/packages/Elm%20Language%20Support)
+*   [Vim](https://github.com/lambdatoast/elm.vim)
+*   [VS Code](https://github.com/sbrink/vscode-elm)
+
+---
+
 ## Lesson 1: Getting Started
 
 Go ahead and download branch [01_Start](https://github.com/jenningstcj/Elm-Workshop/tree/01_Start) and follow along with the tutorial below.
