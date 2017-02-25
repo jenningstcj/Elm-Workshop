@@ -8668,35 +8668,6 @@ var _user$project$Main$view = function (model) {
 			}
 		});
 };
-var _user$project$Main$update = F2(
-	function (msg, model) {
-		var _p0 = msg;
-		if (_p0.ctor === 'MapMovedUpdate') {
-			return {
-				ctor: '_Tuple2',
-				_0: _elm_lang$core$Native_Utils.update(
-					model,
-					{pos: _p0._0}),
-				_1: _elm_lang$core$Platform_Cmd$none
-			};
-		} else {
-			if (_p0._0.ctor === 'Ok') {
-				var _p1 = _p0._0._0;
-				var altitude = _user$project$Main$kilometersToMiles(_p1.altitude);
-				var velocity = _user$project$Main$kilometersToMiles(_p1.velocity);
-				var newPos = A2(_user$project$SharedModels$GMPos, _p1.latitude, _p1.longitude);
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{pos: newPos, vel: velocity, alt: altitude}),
-					_1: _user$project$GMaps$moveMap(newPos)
-				};
-			} else {
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-			}
-		}
-	});
 var _user$project$Main$Model = F3(
 	function (a, b, c) {
 		return {pos: a, alt: b, vel: c};
@@ -8720,6 +8691,9 @@ var _user$project$Main$decodeISSPosition = A5(
 	A2(_elm_lang$core$Json_Decode$field, 'longitude', _elm_lang$core$Json_Decode$float),
 	A2(_elm_lang$core$Json_Decode$field, 'altitude', _elm_lang$core$Json_Decode$float),
 	A2(_elm_lang$core$Json_Decode$field, 'velocity', _elm_lang$core$Json_Decode$float));
+var _user$project$Main$FetchPosition = function (a) {
+	return {ctor: 'FetchPosition', _0: a};
+};
 var _user$project$Main$LoadData = function (a) {
 	return {ctor: 'LoadData', _0: a};
 };
@@ -8728,6 +8702,38 @@ var _user$project$Main$getLocation = function () {
 	var request = A2(_elm_lang$http$Http$get, url, _user$project$Main$decodeISSPosition);
 	return A2(_elm_lang$http$Http$send, _user$project$Main$LoadData, request);
 }();
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p0 = msg;
+		switch (_p0.ctor) {
+			case 'MapMovedUpdate':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{pos: _p0._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'LoadData':
+				if (_p0._0.ctor === 'Ok') {
+					var _p1 = _p0._0._0;
+					var altitude = _user$project$Main$kilometersToMiles(_p1.altitude);
+					var velocity = _user$project$Main$kilometersToMiles(_p1.velocity);
+					var newPos = A2(_user$project$SharedModels$GMPos, _p1.latitude, _p1.longitude);
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{pos: newPos, vel: velocity, alt: altitude}),
+						_1: _user$project$GMaps$moveMap(newPos)
+					};
+				} else {
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				}
+			default:
+				return {ctor: '_Tuple2', _0: model, _1: _user$project$Main$getLocation};
+		}
+	});
 var _user$project$Main$MapMovedUpdate = function (a) {
 	return {ctor: 'MapMovedUpdate', _0: a};
 };
@@ -8736,7 +8742,11 @@ var _user$project$Main$subscriptions = function (model) {
 		{
 			ctor: '::',
 			_0: _user$project$GMaps$mapMoved(_user$project$Main$MapMovedUpdate),
-			_1: {ctor: '[]'}
+			_1: {
+				ctor: '::',
+				_0: A2(_elm_lang$core$Time$every, 5 * _elm_lang$core$Time$second, _user$project$Main$FetchPosition),
+				_1: {ctor: '[]'}
+			}
 		});
 };
 var _user$project$Main$main = _elm_lang$html$Html$program(

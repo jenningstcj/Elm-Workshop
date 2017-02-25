@@ -5,6 +5,8 @@ import SharedModels exposing (GMPos)
 import GMaps exposing (moveMap, mapMoved)
 import Http
 import Json.Decode exposing (..)
+import Time exposing (..)
+
 
 -- MAIN
 
@@ -54,6 +56,7 @@ init =
 type Msg
     = MapMovedUpdate GMPos
     | LoadData (Result Http.Error ISS_JSON)
+    | FetchPosition Time
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -84,6 +87,8 @@ update msg model =
         LoadData (Err _) ->
              ( model, Cmd.none )
 
+        FetchPosition time ->
+            ( model, getLocation )
 
 -- VIEW
 
@@ -104,9 +109,10 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch[
-      mapMoved MapMovedUpdate
-    ]
+    Sub.batch
+        [ mapMoved MapMovedUpdate
+        , Time.every (5 * second) FetchPosition
+        ]
 
 
 
