@@ -125,7 +125,7 @@ elm-make --warn src/Main.elm --output=main.js
 ```
 Now if you open the `index.html` file in your browser you should see the Google Maps displayed and if you inspect the source code you will see the empty div returned by your Elm program.
 
-This is the end of Lesson 1.  Your code should match [branch 02](https://github.com/jenningstcj/Elm-Workshop/tree/02).
+This is the end of Lesson 1.  Your code should match [branch 02](https://github.com/jenningstcj/Elm-Workshop/tree/02_Defining_Models).
 
 
 ---
