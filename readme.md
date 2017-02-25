@@ -32,7 +32,11 @@ git clone https://github.com/jenningstcj/Elm-Workshop.git -b 01_Start Elm-Worksh
 
 If you have installed Elm already, do so now with `npm install -g elm`.  This will install Elm globally and allow the usage of `elm-make`, `elm-reactor`, `elm-repl`, and `elm-package`.  
 
-The **01_Start** branch of this repo is barebones with only an HTML file.  Navigate to the root of the `Elm-Workshop` directory in your terminal.  The quickest way to start a new Elm project is to type `elm-make` and hit Enter.  This will create an elm-package.json file and install the Core and Html libraries for Elm.  Then go ahead and install the Http library with the command:
+The **01_Start** branch of this repo is barebones with only an HTML file.  Navigate to the root of the `Elm-Workshop` directory in your terminal.  The quickest way to start a new Elm project is to type 
+```
+elm-make
+``` 
+and hit Enter.  This will create an elm-package.json file and install the Core and Html libraries for Elm.  Then go ahead and install the Http library with the command:
 
 ```
 elm-package install elm-lang/http -y
