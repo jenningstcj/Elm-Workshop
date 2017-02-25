@@ -3,7 +3,8 @@ module Main exposing (..)
 import Html exposing (Html, div, p, text)
 import SharedModels exposing (GMPos)
 import GMaps exposing (moveMap, mapMoved)
-
+import Http
+import Json.Decode exposing (..)
 
 -- MAIN
 
@@ -16,7 +17,7 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
-        
+
 
 
 type alias Model =
@@ -25,6 +26,13 @@ type alias Model =
     , vel : Int
     }
 
+
+type alias ISS_JSON =
+    { latitude : Float
+    , longitude : Float
+    , altitude : Float
+    , velocity : Float
+    }
 
 
 -- INIT
@@ -45,6 +53,7 @@ init =
 
 type Msg
     = MapMovedUpdate GMPos
+    | LoadData (Result Http.Error ISS_JSON)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -53,6 +62,27 @@ update msg model =
         MapMovedUpdate newPos ->
             ( { model | pos = newPos }, Cmd.none )
 
+        LoadData (Ok newISSPos) ->
+             let
+                 newPos =
+                     GMPos newISSPos.latitude newISSPos.longitude
+
+                 velocity =
+                     kilometersToMiles newISSPos.velocity
+
+                 altitude =
+                     kilometersToMiles newISSPos.altitude
+             in
+                 ( { model
+                     | pos = newPos
+                     , vel = velocity
+                     , alt = altitude
+                   }
+                 , moveMap newPos
+                 )
+
+        LoadData (Err _) ->
+             ( model, Cmd.none )
 
 
 -- VIEW
@@ -77,3 +107,36 @@ subscriptions model =
     Sub.batch[
       mapMoved MapMovedUpdate
     ]
+
+
+
+
+-- Http
+
+
+getLocation : Cmd Msg
+getLocation =
+    let
+        url =
+            "https://api.wheretheiss.at/v1/satellites/25544"
+
+        request =
+            Http.get url decodeISSPosition
+    in
+       Http.send LoadData request
+
+
+decodeISSPosition : Decoder ISS_JSON
+decodeISSPosition =
+    map4 ISS_JSON
+        (field "latitude" float)
+        (field "longitude" float)
+        (field "altitude" float)
+        (field "velocity" float)
+
+
+kilometersToMiles : Float -> Int
+kilometersToMiles km =
+    km
+        * 0.62137
+        |> round
