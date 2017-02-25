@@ -74,6 +74,7 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch[
-      mapMoved MapMovedUpdate
-    ]
+    Sub.batch
+        [
+          mapMoved MapMovedUpdate
+        ]
