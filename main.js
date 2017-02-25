@@ -7795,24 +7795,139 @@ var _elm_lang$html$Html$summary = _elm_lang$html$Html$node('summary');
 var _elm_lang$html$Html$menuitem = _elm_lang$html$Html$node('menuitem');
 var _elm_lang$html$Html$menu = _elm_lang$html$Html$node('menu');
 
-var _user$project$Main$subscriptions = function (model) {
-	return _elm_lang$core$Platform_Sub$none;
-};
+var _user$project$SharedModels$GMPos = F2(
+	function (a, b) {
+		return {lat: a, lng: b};
+	});
+
+var _user$project$GMaps$moveMap = _elm_lang$core$Native_Platform.outgoingPort(
+	'moveMap',
+	function (v) {
+		return {lat: v.lat, lng: v.lng};
+	});
+var _user$project$GMaps$mapMoved = _elm_lang$core$Native_Platform.incomingPort(
+	'mapMoved',
+	A2(
+		_elm_lang$core$Json_Decode$andThen,
+		function (lat) {
+			return A2(
+				_elm_lang$core$Json_Decode$andThen,
+				function (lng) {
+					return _elm_lang$core$Json_Decode$succeed(
+						{lat: lat, lng: lng});
+				},
+				A2(_elm_lang$core$Json_Decode$field, 'lng', _elm_lang$core$Json_Decode$float));
+		},
+		A2(_elm_lang$core$Json_Decode$field, 'lat', _elm_lang$core$Json_Decode$float)));
+
 var _user$project$Main$view = function (model) {
 	return A2(
 		_elm_lang$html$Html$div,
 		{ctor: '[]'},
-		{ctor: '[]'});
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$p,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							'Latitude: ',
+							_elm_lang$core$Basics$toString(model.pos.lat))),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$p,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								'Longitude: ',
+								_elm_lang$core$Basics$toString(model.pos.lng))),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$p,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									'Altitude: ',
+									A2(
+										_elm_lang$core$Basics_ops['++'],
+										_elm_lang$core$Basics$toString(model.alt),
+										' miles'))),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$p,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text(
+									A2(
+										_elm_lang$core$Basics_ops['++'],
+										'Velocity: ',
+										A2(
+											_elm_lang$core$Basics_ops['++'],
+											_elm_lang$core$Basics$toString(model.vel),
+											' miles per hour'))),
+								_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
+					}
+				}
+			}
+		});
 };
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+		var _p0 = msg;
+		return {
+			ctor: '_Tuple2',
+			_0: _elm_lang$core$Native_Utils.update(
+				model,
+				{pos: _p0._0}),
+			_1: _elm_lang$core$Platform_Cmd$none
+		};
 	});
-var _user$project$Main$Model = {};
-var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Main$Model, _1: _elm_lang$core$Platform_Cmd$none};
+var _user$project$Main$Model = F3(
+	function (a, b, c) {
+		return {pos: a, alt: b, vel: c};
+	});
+var _user$project$Main$init = function () {
+	var knoxville = A2(_user$project$SharedModels$GMPos, 35.9335673, -84.016913);
+	return {
+		ctor: '_Tuple2',
+		_0: A3(_user$project$Main$Model, knoxville, 0, 0),
+		_1: _user$project$GMaps$moveMap(knoxville)
+	};
+}();
+var _user$project$Main$MapMovedUpdate = function (a) {
+	return {ctor: 'MapMovedUpdate', _0: a};
+};
+var _user$project$Main$subscriptions = function (model) {
+	return _elm_lang$core$Platform_Sub$batch(
+		{
+			ctor: '::',
+			_0: _user$project$GMaps$mapMoved(_user$project$Main$MapMovedUpdate),
+			_1: {ctor: '[]'}
+		});
+};
 var _user$project$Main$main = _elm_lang$html$Html$program(
 	{init: _user$project$Main$init, view: _user$project$Main$view, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})();
-var _user$project$Main$Update = {ctor: 'Update'};
 
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};

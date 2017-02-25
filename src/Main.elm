@@ -1,6 +1,8 @@
 module Main exposing (..)
 
 import Html exposing (Html, div, p, text)
+import SharedModels exposing (GMPos)
+import GMaps exposing (moveMap, mapMoved)
 
 
 -- MAIN
@@ -14,10 +16,14 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+        
 
 
 type alias Model =
-    {}
+    { pos : GMPos
+    , alt : Int
+    , vel : Int
+    }
 
 
 
@@ -26,7 +32,11 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model, Cmd.none )
+    let
+        knoxville =
+            (GMPos 35.9335673 -84.016913)
+    in
+        ( Model knoxville 0 0, moveMap knoxville )
 
 
 
@@ -34,12 +44,14 @@ init =
 
 
 type Msg
-    = Update
+    = MapMovedUpdate GMPos
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        MapMovedUpdate newPos ->
+            ( { model | pos = newPos }, Cmd.none )
 
 
 
@@ -48,7 +60,12 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [] []
+    div []
+        [ p [] [ text ("Latitude: " ++ toString model.pos.lat) ]
+        , p [] [ text ("Longitude: " ++ toString model.pos.lng) ]
+        , p [] [ text ("Altitude: " ++ toString model.alt ++ " miles") ]
+        , p [] [ text ("Velocity: " ++ toString model.vel ++ " miles per hour") ]
+        ]
 
 
 
@@ -57,7 +74,6 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
-
-
-    
+    Sub.batch[
+      mapMoved MapMovedUpdate
+    ]

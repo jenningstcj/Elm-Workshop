@@ -37,6 +37,20 @@
                     title: 'ISS'
                 });
 
+        instance.ports.moveMap.subscribe(function(gmPos) {
+             console.log("received", gmPos);
+             var myLatlng = new google.maps.LatLng(gmPos);
+             gmap.setCenter(myLatlng);
+             marker.setPosition(myLatlng);
+         });
+
+         gmap.addListener('drag', function() {
+           var newPos = {
+             lat: gmap.getCenter().lat(),
+             lng: gmap.getCenter().lng()
+           };
+           instance.ports.mapMoved.send(newPos);
+         });
    </script>
   </body>
 </html>
