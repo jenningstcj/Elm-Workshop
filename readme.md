@@ -271,7 +271,7 @@ First we use our port `moveMap` to subscribe to data coming from Elm into JavaSc
 
 If you compile your application now with `elm-make --warn src/Main.elm --output=main.js` you should have a working application that initializes and centers the map to Knoxville.  If you drag the map around, you should see the Latitude and Longitude values update as well.
 
-Now your code should match [branch 03](https://github.com/jenningstcj/Elm-Workshop/tree/03).
+Now your code should match [branch 03](https://github.com/jenningstcj/Elm-Workshop/tree/03_Http).
 
 
 ---
