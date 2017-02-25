@@ -373,7 +373,7 @@ kilometersToMiles km =
         |> round
 ```
 
-Now if you compile this with `elm-make --warn src/Main.elm --output=main.js` you should have a successful compile, but if you open the index.html in a browser you may not see any difference yet because nothing is triggering the HTTP call to actually happen.  Your code should match [branch 04](https://github.com/jenningstcj/Elm-Workshop/tree/04).
+Now if you compile this with `elm-make --warn src/Main.elm --output=main.js` you should have a successful compile, but if you open the index.html in a browser you may not see any difference yet because nothing is triggering the HTTP call to actually happen.  Your code should match [branch 04](https://github.com/jenningstcj/Elm-Workshop/tree/04_Subscriptions).
 
 
 ---
