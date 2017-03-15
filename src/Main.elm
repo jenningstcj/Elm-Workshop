@@ -61,7 +61,8 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ p [] [ text ("Latitude: " ++ toString model.pos.lat) ]
+        [ h3 [] [text "Tracking the International Space Station"]
+        , p [] [ text ("Latitude: " ++ toString model.pos.lat) ]
         , p [] [ text ("Longitude: " ++ toString model.pos.lng) ]
         , p [] [ text ("Altitude: " ++ toString model.alt ++ " miles") ]
         , p [] [ text ("Velocity: " ++ toString model.vel ++ " miles per hour") ]
