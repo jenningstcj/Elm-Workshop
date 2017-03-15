@@ -106,7 +106,9 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [] []
+    div [] [
+    h3 [] [text "Tracking the International Space Station"]
+    ]
 
 
 
