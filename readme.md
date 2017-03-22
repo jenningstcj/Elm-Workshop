@@ -19,6 +19,9 @@ Also, it makes a world of difference to have your editor of choice configured wi
 *   [Vim](https://github.com/lambdatoast/elm.vim)
 *   [VS Code](https://github.com/sbrink/vscode-elm)
 
+
+If you want your Elm code auto-formatted (I recommend it), then you can install Elm-format and the plugin for your editor from [here](https://github.com/avh4/elm-format)
+
 ---
 
 ## Lesson 1: Getting Started
